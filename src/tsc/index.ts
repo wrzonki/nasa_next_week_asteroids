@@ -3,6 +3,7 @@ const apiKey = 'QqWsFKIoDWEbA5HwUP5VhCvuDI61oU7a4IRjwhB4';
 interface Window {
     NEO:any
     M:any
+    closestAsteroid:any
 }
 
 const getDate = () => {
@@ -33,10 +34,10 @@ const getAsteroids = (day:string) => {
     for (let asteroid in window.NEO.near_earth_objects[day]) {
         let aster = window.NEO.near_earth_objects[day][asteroid];
         snippet += `
-            <table style="margin-bottom:50px;">
+            <table class="striped">
                 <thead>
                     <tr>
-                        <th>ID: ${aster.id} | NAME: ${aster.name} | IS POTENTIALY HAZARDOUS: ${aster.is_potentially_hazardous_asteroid}</th>
+                        <th>ID: ${aster.id} | Nazwa: ${aster.name} | Potencjalne zagrożenie: ${aster.is_potentially_hazardous_asteroid}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -55,13 +56,49 @@ const getAsteroids = (day:string) => {
     return `<ul>${snippet}</ul>`;
 };
 
+const countdown = t => {
+    let now = new Date().getTime();
+    let distance = t - now;
+
+    var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    return `${days} dni, ${hours}:${minutes}:${seconds}`
+}
+
+const dangers = () => {
+    let el = document.getElementById('additional');
+    let dangers = 0;
+    let name = 'placeholder';
+    let time = Infinity;
+    let now = new Date().getTime()
+    for (let day in window.NEO.near_earth_objects) {
+        for (let aster in window.NEO.near_earth_objects[day]) {
+            let asteroid = window.NEO.near_earth_objects[day][aster];
+            if (asteroid.is_potentially_hazardous_asteroid === 'true') {
+                dangers++;
+            }
+            if (asteroid.close_approach_data[0].epoch_date_close_approach < time && asteroid.close_approach_data[0].epoch_date_close_approach > now) {
+                time = asteroid.close_approach_data[0].epoch_date_close_approach;
+                name = asteroid.name;
+            }
+        }
+    }
+
+    setInterval(()=> {
+        el.innerHTML = `Zagrożeń: ${dangers} <br/>Najbliższy przelot: ${name}<br/> Pozostały czas: ${countdown(time)}`;
+    },1000)
+}
+
 const generateTemplate = () => {
     let days = Object.keys(window.NEO.near_earth_objects).sort();
     let snippet = ''
     for (let day in days) {
         snippet += `
             <li>
-                <div class="collapsible-header">${days[day]}</div>
+                <div class="collapsible-header center-align">${days[day]}</div>
                 <div class="collapsible-body">
                     ${getAsteroids(days[day])}
                 </div>
@@ -72,6 +109,7 @@ const generateTemplate = () => {
 
     document.getElementById('output').innerHTML += `<ul class="collapsible">${snippet}</ul>`;
     window.M.Collapsible.init(document.querySelectorAll('.collapsible'));
+    dangers()
 };
 
 

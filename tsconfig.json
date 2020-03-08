@@ -1,6 +1,6 @@
 {
   "include": [
-    "src/tsc"
+    "src/tsc", "src/neo.js"
   ],
   "exclude": [
     "node_modules",
