@@ -1,0 +1,16 @@
+{
+  "include": [
+    "src/tsc"
+  ],
+  "exclude": [
+    "node_modules",
+  ],
+  "compilerOptions": {
+    "target": "ES5",
+    "module": "commonjs",
+    "lib": ["ESNext", "DOM"],
+    "strict": false,
+    "esModuleInterop": true,
+    "outDir": "src"
+  }
+}
